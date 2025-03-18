@@ -15,24 +15,37 @@ import { Feature } from "ol";
 import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
+import { ImageTile } from "ol/source";
 
 
 export default function Track(){
     //reference to div element where map is drawn
     const mapRef = useRef(null);
-
+    const key = 'maptiles api key';
+    const attributions =
+    '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> ' +
+    '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>';
 
     useEffect(() => {
         if (mapRef.current) {
             //Halmira Bridge
-            const startingLocation = fromLonLat([93.8011467, 26.5438662]);
-            // const startingLocation = fromLonLat([26.6700, 47.4768]);
+            const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
+            //rahul home
+            // const startingLocation = fromLonLat([93.793962, 26.549928]);
 
             //map object
             const map = new Map({
                 layers: [
+                    // new TileLayer({
+                    //   source: new OSM(),
+                    // }),
                     new TileLayer({
-                      source: new OSM(),
+                        source: new ImageTile({
+                          attributions: attributions,
+                          url: 'https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=' + key,
+                          tileSize: 512,
+                          maxZoom: 50,
+                        }),
                     }),
                     new VectorLayer({
                         source: new VectorSource({
@@ -52,7 +65,7 @@ export default function Track(){
                 ],
                 view: new View({
                     center: startingLocation,
-                    zoom: 12,
+                    zoom: 15,
                 }),
                 controls: [
                     new ScaleLine(), // Add scale line to the map
