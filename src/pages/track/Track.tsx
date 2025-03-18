@@ -22,7 +22,6 @@ export default function Track(){
             // const startingLocation = fromLonLat([26.6700, 47.4768]);
 
 
-
             //map object
             const map = new Map({
                 layers: [
