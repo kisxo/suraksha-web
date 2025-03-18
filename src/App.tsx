@@ -6,8 +6,6 @@ import Track from './pages/track/Track';
 function App() {
 
   return (
-      <div className="bg-animation-container">
-          <div className="bg"></div>
       <BrowserRouter>
         <Routes>
 
@@ -15,7 +13,6 @@ function App() {
 
         </Routes>
       </BrowserRouter>
-      </div>
     );
 }
 
