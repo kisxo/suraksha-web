@@ -1,0 +1,62 @@
+/* Custom styles for OpenLayers zoom controls */
+
+/* Style the zoom control container */
+.ol-zoom {
+    position: absolute;
+    bottom: 10px;  /* Position the zoom control at the top */
+    right: 10px; /* Position the zoom control to the left */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background for better visibility */
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Style for zoom-in (+) button */
+  .ol-zoom-in {
+    margin-bottom: 1rem;
+    background-color: #4CAF50;  /* Green background */
+    color: white;               /* White text */
+    border: 2px solid #388E3C;  /* Dark green border */
+    border-radius: 50%;         /* Circular button */
+    width: 40px;                /* Width of the button */
+    height: 40px;               /* Height of the button */
+    font-size: 20px;            /* Increase the font size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;           /* Change cursor to pointer */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  /* Style for zoom-out (-) button */
+  .ol-zoom-out {
+    background-color: #F44336; /* Red background */
+    color: white;              /* White text */
+    border: 2px solid #D32F2F; /* Dark red border */
+    border-radius: 50%;        /* Circular button */
+    width: 40px;               /* Width of the button */
+    height: 40px;              /* Height of the button */
+    font-size: 20px;           /* Increase the font size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;          /* Change cursor to pointer */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  /* Hover effect for zoom buttons*/
+  .ol-zoom-in:hover{
+    transform: scale(1.1);
+    background-color: #388E3C;
+  }
+  .ol-zoom-out:hover{
+    transform: scale(1.1);
+    background-color: #D32F2F;
+  }
+
+  /* Style the zoom control on focus */
+  .ol-zoom-in:focus, .ol-zoom-out:focus {
+    outline: none;             /* Remove default outline */
+    box-shadow: 0 0 0 2px #2196F3; /* Blue outline on focus */
+  }
+  
