@@ -9,23 +9,46 @@ import { fromLonLat } from 'ol/proj';
 // Import additional controls and features
 import ScaleLine from 'ol/control/ScaleLine';
 import Zoom from 'ol/control/Zoom';
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Feature } from "ol";
+import { Point } from "ol/geom";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
 
 
 export default function Track(){
     //reference to div element where map is drawn
     const mapRef = useRef(null);
 
+
     useEffect(() => {
         if (mapRef.current) {
             //Halmira Bridge
-            const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
+            const startingLocation = fromLonLat([93.8011467, 26.5438662]);
             // const startingLocation = fromLonLat([26.6700, 47.4768]);
-
 
             //map object
             const map = new Map({
                 layers: [
-                    new TileLayer({source: new OSM()}),
+                    new TileLayer({
+                      source: new OSM(),
+                    }),
+                    new VectorLayer({
+                        source: new VectorSource({
+                            features: [
+                                new Feature({
+                                    geometry:  new Point(startingLocation),
+                                }),
+                            ],
+                        }),
+                        style: new Style({
+                            image: new Icon({
+                              src: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/map-marker-1024.png', // Example marker icon
+                              scale: .04, // Resize the icon
+                            })
+                        })
+                    })
                 ],
                 view: new View({
                     center: startingLocation,
