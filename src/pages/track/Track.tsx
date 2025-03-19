@@ -20,7 +20,7 @@ import Geolocation from 'ol/Geolocation.js';
 import Feature from "ol/Feature";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from 'ol/layer/Vector.js';
-// import Icon from "ol/style/Icon";
+import DragRotateAndZoom from 'ol/interaction/DragRotateAndZoom.js';
 
 
 export default function Track(){
@@ -117,7 +117,7 @@ export default function Track(){
                 hybridTile,
             ]
 
-            
+            map.addInteraction(new DragRotateAndZoom())
             map.setLayers(layers)
             map.setView(view)
             map.addControl(new ScaleLine())

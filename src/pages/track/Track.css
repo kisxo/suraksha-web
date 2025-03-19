@@ -94,8 +94,29 @@
 /* Map compass style */
 
 .ol-compass{
-  background-color: red;
   position: absolute;
-  bottom: 10px;
-  display: none;
+  right: 35px;
+  top: 90px;
+  /* display: none; */
+  /* visibility: hidden; */
+  background-color: aqua;
+}
+
+.ol-compass:after {
+  content: '';
+  visibility: visible;
+  display: block;
+  position: absolute;
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+  padding: 1rem;
+  border: 5px solid white;
+  background-color: #fff;
+  background-image: url('https://banner2.cleanpng.com/20180324/arw/av096j94x.webp');
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  left: calc(50% - 25px);
+  bottom: calc(50% - 25px);
 }
