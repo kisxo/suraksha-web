@@ -23,7 +23,6 @@ import { circular } from "ol/geom/Polygon";
 export default function Track(){
     //reference to div element where map is drawn
     const mapRef = useRef<HTMLDivElement | null>(null);
-    const [gpsPermission, setGpsPermission] = useState(false)
 
     // api key safe only for magicminute.online
     const key = '5noTd0jsxwRqAPJGzPA1';
@@ -117,6 +116,7 @@ export default function Track(){
           navigator.geolocation.getCurrentPosition(
             (position) => {
                 console.log("Got Gps Permission")
+                console.log(position)
                 setGpsPermission(true);
             },
             (error) => {
