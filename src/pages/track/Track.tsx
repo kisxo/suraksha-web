@@ -29,11 +29,12 @@ export default function Track(){
     // const startingLocation = fromLonLat([93.9420671, 26.3415901]);
     //reference to div element where map is drawn
     const mapRef = useRef<HTMLDivElement | null>(null);
-    const { coords, isGeolocationAvailable, isGeolocationEnabled } = useGeolocated({
-        positionOptions: {
-            enableHighAccuracy: false,
-        },
-        userDecisionTimeout: 5000,
+    const { coords, isGeolocationAvailable, isGeolocationEnabled } =
+        useGeolocated({
+            positionOptions: {
+                enableHighAccuracy: false,
+            },
+        userDecisionTimeout: 50000,
     });
 
     // api key safe only for magicminute.online
@@ -89,7 +90,7 @@ export default function Track(){
     
     const userMarker = new Style({
         image: new CircleStyle({
-            radius: 5,
+            radius: 8,
             fill: new Fill({color: 'yellow'}),
             stroke: new Stroke({color: 'red', width: 1}),
         }),
@@ -99,12 +100,11 @@ export default function Track(){
         const vectorContext = getVectorContext(event);
 
         //set user location
-        let userPoint = new Point(fromLonLat([x += 0.00004, 26.51823896692769]));
+        let userPoint = new Point(fromLonLat([x += 0.00001, 26.51823896692769]));
 
         //render user point
         vectorContext.setStyle(userMarker);
         vectorContext.drawGeometry(userPoint);
-        console.log(coords)
       
         map.render();
     })
@@ -113,17 +113,25 @@ export default function Track(){
 
     return (
         <>
-            <h3 className="bg-red-500">Tracking</h3>
+            <h3>Tracking</h3>
+            <div ref={mapRef} className='h-[800px]'></div>
             {!isGeolocationAvailable ? 
             (   
                 <h3>Location not avilable</h3>
             ):!isGeolocationEnabled ?
             (
-                <h3>Geo Location not avilable</h3>
+                <h3>Geo Location not enabled</h3>
+            ):coords?
+            (
+               <>
+               {console.log(coords)}
+               </>
             ):
             (
-                <div ref={mapRef} className='h-[800px]'></div>
+                <div>Getting the location data&hellip; </div>
             )}
+                <h3>Map</h3>
+                
         </>
     )
 }
