@@ -3,7 +3,7 @@ import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
-import { useEffect, useRef, useState} from 'react';
+import { useEffect, useRef} from 'react';
 import { fromLonLat } from 'ol/proj';
 
 // Import additional controls and features
@@ -117,7 +117,7 @@ export default function Track(){
             (position) => {
                 console.log("Got Gps Permission")
                 console.log(position)
-                setGpsPermission(true);
+                // setGpsPermission(true);
             },
             (error) => {
               if (error.code === error.PERMISSION_DENIED) {
