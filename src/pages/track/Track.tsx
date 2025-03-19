@@ -17,30 +17,55 @@ import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { ImageTile } from "ol/source";
 import { circular } from "ol/geom/Polygon";
-
+import { useGeolocated } from "react-geolocated";
 
 
 export default function Track(){
+    //Halmira Bridge
+    const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
+    //rahul home
+    // const startingLocation = fromLonLat([93.793962, 26.549928]);
+    //manprabesh home 
+    // const startingLocation = fromLonLat([93.9420671, 26.3415901]);
     //reference to div element where map is drawn
     const mapRef = useRef<HTMLDivElement | null>(null);
+    const { coords, isGeolocationAvailable, isGeolocationEnabled } = useGeolocated({
+        positionOptions: {
+            enableHighAccuracy: false,
+        },
+        userDecisionTimeout: 5000,
+    });
+    let scale = 0.05;
+    let growing = true;
+    let x = 93.94114639182163;
 
     // api key safe only for magicminute.online
-    const key = '5noTd0jsxwRqAPJGzPA1';
+    const key = 'W3C2voHBykIfczgyCU9x ';
 
     const map = new Map();
     const userVector = new VectorSource()
+    const markerVectorLayer = new VectorLayer()
+
+    const displayMap = async () => {
+        // requestLocationPermission();
+        await drawMap();
+        console.log("coords")
+        console.log(coords)
+        console.log('isGeolocationAvailable')
+        console.log(isGeolocationAvailable)
+        console.log('isGeolocationEnabled')
+        console.log(isGeolocationEnabled)
+
+    }
 
     useEffect(() => {
-        requestLocationPermission();
 
+        displayMap()
+        
+    },[])
+
+    const drawMap = async () => {
         if (mapRef.current) {
-            //Halmira Bridge
-            const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
-            //rahul home
-            // const startingLocation = fromLonLat([93.793962, 26.549928]);
-            //manprabesh home 
-            // const startingLocation = fromLonLat([93.9420671, 26.3415901]);
-
 
             const layers = [
                 new TileLayer({
@@ -53,21 +78,7 @@ export default function Track(){
                       maxZoom: 50,
                     }),
                 }),
-                new VectorLayer({
-                    source: new VectorSource({
-                        features: [
-                            new Feature({
-                                geometry:  new Point(startingLocation),
-                            }),
-                        ],
-                    }),
-                    style: new Style({
-                        image: new Icon({
-                          src: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/map-marker-1024.png', // Example marker icon
-                          scale: .04, // Resize the icon
-                        })
-                    })
-                }),
+                markerVectorLayer,
                 new VectorLayer({
                     source: userVector
                 })
@@ -87,8 +98,36 @@ export default function Track(){
     
             return () => map.setTarget(undefined);
         }
-        
-    },[])
+    }
+    const pulseMarker = () => {
+        markerVectorLayer.setSource(
+            new VectorSource({
+                features: [
+                    new Feature({
+                                geometry:  new Point(fromLonLat([x += 0.00001, 26.51823896692769])),
+                    }),
+                ],
+                
+            }),
+        )
+        markerVectorLayer.setStyle(
+            new Style({
+                image: new Icon({
+                  src: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/map-marker-1024.png', // Example marker icon
+                  scale: scale, // Resize the icon
+                })
+            })
+        )
+        if (growing) {
+            scale += 0.0002; // Slower increase in size
+            if (scale >= 0.053) growing = false; // Reverse at max size
+          } else {
+            scale -= 0.0002; // Slower decrease in size
+            if (scale <= 0.047) growing = true; // Reverse at min size
+          }
+        requestAnimationFrame(pulseMarker); // Repeat the animation
+      };
+      pulseMarker()
 
     navigator.geolocation.watchPosition(
         function (pos) {
@@ -110,36 +149,46 @@ export default function Track(){
         },
     );
 
-    const requestLocationPermission = () => {
-        console.log("Getting Permission")
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-                console.log("Got Gps Permission")
-                console.log(position)
-                // setGpsPermission(true);
-            },
-            (error) => {
-              if (error.code === error.PERMISSION_DENIED) {
-                alert("Permission denied by the user.");
-              } else {
-                alert("Error getting location: " + error.message);
-              }
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            }
-          );
-        } else {
-          alert("Geolocation is not supported by this browser.");
-        }
-    };
+    // const requestLocationPermission = () => {
+    //     console.log("Getting Permission")
+    //     if ("geolocation" in navigator) {
+    //       navigator.geolocation.getCurrentPosition(
+    //         (position) => {
+    //             console.log("Got Gps Permission")
+    //             console.log(position)
+    //             // setGpsPermission(true);
+    //         },
+    //         (error) => {
+    //           if (error.code === error.PERMISSION_DENIED) {
+    //             alert("Permission denied by the user.");
+    //           } else {
+    //             alert("Error getting location: " + error.message);
+    //           }
+    //         },
+    //         {
+    //           enableHighAccuracy: true,
+    //           timeout: 10000,
+    //           maximumAge: 0,
+    //         }
+    //       );
+    //     } else {
+    //       alert("Geolocation is not supported by this browser.");
+    //     }
+    // };
 
     return (
         <>
             <h3 className="bg-red-500">Tracking</h3>
+            {/* {!isGeolocationAvailable ? 
+            (   
+                <h3>Location not avilable</h3>
+            ):!isGeolocationEnabled ?
+            (
+                <h3>Geo Location not avilable</h3>
+            ):
+            (
+                <div ref={mapRef} className='h-[400px]'></div>
+            )} */}
             <div ref={mapRef} className='h-[400px]'></div>
         </>
     )
