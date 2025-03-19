@@ -20,6 +20,7 @@ import Geolocation from 'ol/Geolocation.js';
 import Feature from "ol/Feature";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from 'ol/layer/Vector.js';
+// import Icon from "ol/style/Icon";
 
 
 export default function Track(){
@@ -38,6 +39,7 @@ export default function Track(){
     const key = 'W3C2voHBykIfczgyCU9x ';
 
     const map = new Map();
+    // const deviceOrientation = new DeviceOrientationEvent('deviceorientation')
     const view = new View({
         center: startingLocation,
         zoom: 14,
@@ -78,16 +80,11 @@ export default function Track(){
         positionFeature.setStyle(
             new Style({
                 image: new CircleStyle({
-                radius: 6,
-                fill: new Fill({
-                    color: '#3399CC',
+                    radius: 8,
+                    fill: new Fill({color: '#007FFF'}),
+                    stroke: new Stroke({color: 'white', width: 2}),
                 }),
-                stroke: new Stroke({
-                    color: '#fff',
-                    width: 2,
-                }),
-                }),
-            }),
+            })
         );
 
         geolocation.on('change:position', function () {
@@ -136,8 +133,8 @@ export default function Track(){
     const userMarker = new Style({
         image: new CircleStyle({
             radius: 8,
-            fill: new Fill({color: 'yellow'}),
-            stroke: new Stroke({color: 'red', width: 1}),
+            fill: new Fill({color: '#E32636'}),
+            stroke: new Stroke({color: 'white', width: 2}),
         }),
     });
 
