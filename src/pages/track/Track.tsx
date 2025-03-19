@@ -16,6 +16,7 @@ import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { ImageTile } from "ol/source";
+import { circular } from "ol/geom/Polygon";
 
 
 
@@ -23,9 +24,10 @@ export default function Track(){
     //reference to div element where map is drawn
     const mapRef = useRef<HTMLDivElement | null>(null);
 
-    const key = 'maptiler api key';
+    const key = 'maptiler-api-key';
 
     const map = new Map();
+    const userVector = new VectorSource()
 
     useEffect(() => {
         if (mapRef.current) {
@@ -64,6 +66,9 @@ export default function Track(){
                         })
                     })
                 }),
+                new VectorLayer({
+                    source: userVector
+                })
             ]
 
             const view: View = new View({
@@ -81,6 +86,27 @@ export default function Track(){
             return () => map.setTarget(undefined);
         }
     },[])
+
+
+    navigator.geolocation.watchPosition(
+        function (pos) {
+          const coords = [pos.coords.longitude, pos.coords.latitude];
+          const accuracy = circular(coords, pos.coords.accuracy);
+          userVector.clear(true);
+          userVector.addFeatures([
+            new Feature(
+              accuracy.transform('EPSG:4326', map.getView().getProjection()),
+            ),
+            new Feature(new Point(fromLonLat(coords))),
+          ]);
+        },
+        function (error) {
+          alert(`ERROR: ${error.message}`);
+        },
+        {
+          enableHighAccuracy: true,
+        },
+      );
 
     return (
         <>
