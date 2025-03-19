@@ -3,7 +3,7 @@ import Map from 'ol/Map.js';
 import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
-import { useEffect, useRef} from 'react';
+import { useEffect, useRef, useState} from 'react';
 import { fromLonLat } from 'ol/proj';
 
 // Import additional controls and features
@@ -23,15 +23,18 @@ import { circular } from "ol/geom/Polygon";
 export default function Track(){
     //reference to div element where map is drawn
     const mapRef = useRef<HTMLDivElement | null>(null);
+    const [gpsPermission, setGpsPermission] = useState(false)
 
-    const key = 'maptiler-api-key';
+    // api key safe only for magicminute.online
+    const key = '5noTd0jsxwRqAPJGzPA1';
 
     const map = new Map();
     const userVector = new VectorSource()
 
     useEffect(() => {
+        requestLocationPermission();
+
         if (mapRef.current) {
-            console.log("userLocation")
             //Halmira Bridge
             const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
             //rahul home
@@ -85,28 +88,54 @@ export default function Track(){
     
             return () => map.setTarget(undefined);
         }
+        
     },[])
-
 
     navigator.geolocation.watchPosition(
         function (pos) {
-          const coords = [pos.coords.longitude, pos.coords.latitude];
-          const accuracy = circular(coords, pos.coords.accuracy);
-          userVector.clear(true);
-          userVector.addFeatures([
+            const coords = [pos.coords.longitude, pos.coords.latitude];
+            const accuracy = circular(coords, pos.coords.accuracy);
+            userVector.clear(true);
+            userVector.addFeatures([
             new Feature(
-              accuracy.transform('EPSG:4326', map.getView().getProjection()),
+                accuracy.transform('EPSG:4326', map.getView().getProjection()),
             ),
             new Feature(new Point(fromLonLat(coords))),
-          ]);
+            ]);
         },
         function (error) {
-          alert(`ERROR: ${error.message}`);
+            alert(`ERROR: ${error.message}`);
         },
         {
-          enableHighAccuracy: true,
+            enableHighAccuracy: true,
         },
-      );
+    );
+
+    const requestLocationPermission = () => {
+        console.log("Getting Permission")
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+                console.log("Got Gps Permission")
+                setGpsPermission(true);
+            },
+            (error) => {
+              if (error.code === error.PERMISSION_DENIED) {
+                alert("Permission denied by the user.");
+              } else {
+                alert("Error getting location: " + error.message);
+              }
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            }
+          );
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+    };
 
     return (
         <>
