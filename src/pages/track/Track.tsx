@@ -9,19 +9,19 @@ import { fromLonLat } from 'ol/proj';
 // Import additional controls and features
 import ScaleLine from 'ol/control/ScaleLine';
 import Zoom from 'ol/control/Zoom';
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Feature } from "ol";
+import CircleStyle from 'ol/style/Circle.js';
+import Fill from 'ol/style/Fill.js';
+import Stroke from 'ol/style/Stroke.js';
+import Style from 'ol/style/Style.js';
 import { Point } from "ol/geom";
-import Style from "ol/style/Style";
-import Icon from "ol/style/Icon";
 import { ImageTile } from "ol/source";
-import { circular } from "ol/geom/Polygon";
 import { useGeolocated } from "react-geolocated";
+import { getVectorContext } from "ol/render";
 
 
 export default function Track(){
     //Halmira Bridge
+    let x =93.94114639182163;
     const startingLocation = fromLonLat([93.94114639182163, 26.51823896692769]);
     //rahul home
     // const startingLocation = fromLonLat([93.793962, 26.549928]);
@@ -35,27 +35,22 @@ export default function Track(){
         },
         userDecisionTimeout: 5000,
     });
-    let scale = 0.05;
-    let growing = true;
-    let x = 93.94114639182163;
 
     // api key safe only for magicminute.online
     const key = 'W3C2voHBykIfczgyCU9x ';
 
     const map = new Map();
-    const userVector = new VectorSource()
-    const markerVectorLayer = new VectorLayer()
+    const hybridTile = new TileLayer({
+        source: new ImageTile({
+          url: 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=' + key,
+          tileSize: 512,
+          maxZoom: 50,
+        }),
+    })
+
 
     const displayMap = async () => {
-        // requestLocationPermission();
         await drawMap();
-        console.log("coords")
-        console.log(coords)
-        console.log('isGeolocationAvailable')
-        console.log(isGeolocationAvailable)
-        console.log('isGeolocationEnabled')
-        console.log(isGeolocationEnabled)
-
     }
 
     useEffect(() => {
@@ -71,22 +66,12 @@ export default function Track(){
                 new TileLayer({
                   source: new OSM(),
                 }),
-                new TileLayer({
-                    source: new ImageTile({
-                      url: 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=' + key,
-                      tileSize: 512,
-                      maxZoom: 50,
-                    }),
-                }),
-                markerVectorLayer,
-                new VectorLayer({
-                    source: userVector
-                })
+                hybridTile
             ]
 
             const view: View = new View({
                 center: startingLocation,
-                zoom: 15,
+                zoom: 14,
             })
 
             
@@ -99,87 +84,37 @@ export default function Track(){
             return () => map.setTarget(undefined);
         }
     }
-    const pulseMarker = () => {
-        markerVectorLayer.setSource(
-            new VectorSource({
-                features: [
-                    new Feature({
-                                geometry:  new Point(fromLonLat([x += 0.00001, 26.51823896692769])),
-                    }),
-                ],
-                
-            }),
-        )
-        markerVectorLayer.setStyle(
-            new Style({
-                image: new Icon({
-                  src: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/map-marker-1024.png', // Example marker icon
-                  scale: scale, // Resize the icon
-                })
-            })
-        )
-        if (growing) {
-            scale += 0.0002; // Slower increase in size
-            if (scale >= 0.053) growing = false; // Reverse at max size
-          } else {
-            scale -= 0.0002; // Slower decrease in size
-            if (scale <= 0.047) growing = true; // Reverse at min size
-          }
-        requestAnimationFrame(pulseMarker); // Repeat the animation
-      };
-      pulseMarker()
 
-    navigator.geolocation.watchPosition(
-        function (pos) {
-            const coords = [pos.coords.longitude, pos.coords.latitude];
-            const accuracy = circular(coords, pos.coords.accuracy);
-            userVector.clear(true);
-            userVector.addFeatures([
-            new Feature(
-                accuracy.transform('EPSG:4326', map.getView().getProjection()),
-            ),
-            new Feature(new Point(fromLonLat(coords))),
-            ]);
-        },
-        function (error) {
-            alert(`ERROR: ${error.message}`);
-        },
-        {
-            enableHighAccuracy: true,
-        },
-    );
 
-    // const requestLocationPermission = () => {
-    //     console.log("Getting Permission")
-    //     if ("geolocation" in navigator) {
-    //       navigator.geolocation.getCurrentPosition(
-    //         (position) => {
-    //             console.log("Got Gps Permission")
-    //             console.log(position)
-    //             // setGpsPermission(true);
-    //         },
-    //         (error) => {
-    //           if (error.code === error.PERMISSION_DENIED) {
-    //             alert("Permission denied by the user.");
-    //           } else {
-    //             alert("Error getting location: " + error.message);
-    //           }
-    //         },
-    //         {
-    //           enableHighAccuracy: true,
-    //           timeout: 10000,
-    //           maximumAge: 0,
-    //         }
-    //       );
-    //     } else {
-    //       alert("Geolocation is not supported by this browser.");
-    //     }
-    // };
+    
+    const userMarker = new Style({
+        image: new CircleStyle({
+            radius: 5,
+            fill: new Fill({color: 'yellow'}),
+            stroke: new Stroke({color: 'red', width: 1}),
+        }),
+    });
+
+    hybridTile.on('postrender', function (event) {
+        const vectorContext = getVectorContext(event);
+
+        //set user location
+        let userPoint = new Point(fromLonLat([x += 0.00004, 26.51823896692769]));
+
+        //render user point
+        vectorContext.setStyle(userMarker);
+        vectorContext.drawGeometry(userPoint);
+        console.log(coords)
+      
+        map.render();
+    })
+
+    map.render()
 
     return (
         <>
             <h3 className="bg-red-500">Tracking</h3>
-            {/* {!isGeolocationAvailable ? 
+            {!isGeolocationAvailable ? 
             (   
                 <h3>Location not avilable</h3>
             ):!isGeolocationEnabled ?
@@ -187,9 +122,8 @@ export default function Track(){
                 <h3>Geo Location not avilable</h3>
             ):
             (
-                <div ref={mapRef} className='h-[400px]'></div>
-            )} */}
-            <div ref={mapRef} className='h-[400px]'></div>
+                <div ref={mapRef} className='h-[800px]'></div>
+            )}
         </>
     )
 }
