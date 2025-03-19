@@ -71,7 +71,7 @@ export default function Track(){
         
         geolocation.on('change:accuracyGeometry', function () {
             // @ts-ignore
-            accuracyFeature.setGeometry();
+            accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
         });
 
         const positionFeature = new Feature();
