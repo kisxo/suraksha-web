@@ -15,8 +15,11 @@ import Stroke from 'ol/style/Stroke.js';
 import Style from 'ol/style/Style.js';
 import { Point } from "ol/geom";
 import { ImageTile } from "ol/source";
-import { useGeolocated } from "react-geolocated";
 import { getVectorContext } from "ol/render";
+import Geolocation from 'ol/Geolocation.js';
+import Feature from "ol/Feature";
+import VectorSource from "ol/source/Vector";
+import VectorLayer from 'ol/layer/Vector.js';
 
 
 export default function Track(){
@@ -28,19 +31,18 @@ export default function Track(){
     //manprabesh home 
     // const startingLocation = fromLonLat([93.9420671, 26.3415901]);
     //reference to div element where map is drawn
+
     const mapRef = useRef<HTMLDivElement | null>(null);
-    const { coords, isGeolocationAvailable, isGeolocationEnabled } =
-        useGeolocated({
-            positionOptions: {
-                enableHighAccuracy: false,
-            },
-        userDecisionTimeout: 50000,
-    });
 
     // api key safe only for magicminute.online
     const key = 'W3C2voHBykIfczgyCU9x ';
 
     const map = new Map();
+    const view = new View({
+        center: startingLocation,
+        zoom: 14,
+    })
+    // hybrid satellite map layer
     const hybridTile = new TileLayer({
         source: new ImageTile({
           url: 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=' + key,
@@ -49,15 +51,63 @@ export default function Track(){
         }),
     })
 
+    const geolocation = new Geolocation({
+        trackingOptions: {
+          enableHighAccuracy: true,
+        },
+        projection: view.getProjection(),
+    });
 
     const displayMap = async () => {
         await drawMap();
     }
 
+    const startTracking = async() => {
+        geolocation.setTracking(true);
+        console.log("start tracking")
+        console.log(geolocation.getPosition())
+
+        const accuracyFeature = new Feature();
+        
+        geolocation.on('change:accuracyGeometry', function () {
+            // @ts-ignore
+            accuracyFeature.setGeometry();
+        });
+
+        const positionFeature = new Feature();
+        positionFeature.setStyle(
+            new Style({
+                image: new CircleStyle({
+                radius: 6,
+                fill: new Fill({
+                    color: '#3399CC',
+                }),
+                stroke: new Stroke({
+                    color: '#fff',
+                    width: 2,
+                }),
+                }),
+            }),
+        );
+
+        geolocation.on('change:position', function () {
+            const coordinates = geolocation.getPosition();
+            // @ts-ignore
+            positionFeature.setGeometry(coordinates ? new Point(coordinates) : null);
+        });
+
+        new VectorLayer({
+            map: map,
+            source: new VectorSource({
+              features: [accuracyFeature, positionFeature],
+            }),
+          });
+    }
+
     useEffect(() => {
 
         displayMap()
-        
+
     },[])
 
     const drawMap = async () => {
@@ -67,13 +117,8 @@ export default function Track(){
                 new TileLayer({
                   source: new OSM(),
                 }),
-                hybridTile
+                hybridTile,
             ]
-
-            const view: View = new View({
-                center: startingLocation,
-                zoom: 14,
-            })
 
             
             map.setLayers(layers)
@@ -114,23 +159,13 @@ export default function Track(){
     return (
         <>
             <h3>Tracking</h3>
-            <div ref={mapRef} className='h-[800px]'></div>
-            {!isGeolocationAvailable ? 
-            (   
-                <h3>Location not avilable</h3>
-            ):!isGeolocationEnabled ?
-            (
-                <h3>Geo Location not enabled</h3>
-            ):coords?
-            (
-               <>
-               {console.log(coords)}
-               </>
-            ):
-            (
-                <div>Getting the location data&hellip; </div>
-            )}
+            <div ref={mapRef} className='h-[600px]'></div>
+
                 <h3>Map</h3>
+                <label>
+                    track position
+                    <button onClick={()=> {startTracking()}} className="bg-blue-500">Tract</button>
+                </label>
                 
         </>
     )
